@@ -1,7 +1,7 @@
 import React from 'react';
 import HeaderBar from './HeaderBar';
 
-export default function Layout({ children, page, setPage, userId, onLogout }) {
+export default function Layout({ children, page, setPage, userId, userEmail, onLogout }) {
   return (
     <>
       <HeaderBar
@@ -11,6 +11,7 @@ export default function Layout({ children, page, setPage, userId, onLogout }) {
         onProductos={() => setPage('productos')}
         onClientes={() => setPage('clientes')}
         userId={userId}
+        userEmail={userEmail}
         onLogout={onLogout}
       />
       {children}

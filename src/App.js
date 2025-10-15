@@ -34,7 +34,7 @@ function App() {
   if (!isAuthReady) return <LoadingView loading={!isAuthReady} error={error} />;
 
   return (
-    <Layout page={page} setPage={setPage} userId={userId} onLogout={logout}>
+    <Layout page={page} setPage={setPage} userId={userId} userEmail={userEmail} onLogout={logout}>
       {page === 'clientes' && (
         <CrudView
           title="Clientes"
