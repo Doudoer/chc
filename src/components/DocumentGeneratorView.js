@@ -19,6 +19,7 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
   const [items, setItems] = useState([]);
   const [itemId, setItemId] = useState('');
   const [iva, setIva] = useState(0.16);
+  const [searchProd, setSearchProd] = useState('');
 
   const cliente = clientes.find(c => c.id === clienteId);
   const producto = productos.find(p => p.id === itemId);
@@ -127,6 +128,15 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
       <Typography variant="h6">Artículos</Typography>
       <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <Grid item xs={12} sm={8} md={6}>
+          <Box sx={{ mb: 1 }}>
+            <input
+              type="text"
+              placeholder="Buscar producto..."
+              value={searchProd}
+              onChange={e => setSearchProd(e.target.value)}
+              style={{ padding: 8, fontSize: 16, borderRadius: 4, border: '1px solid #ccc', minWidth: 220, width: '100%' }}
+            />
+          </Box>
           <TextField
             select
             label="Añadir Producto"
@@ -180,7 +190,13 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
             <MenuItem value="" disabled>
               <span style={{ color: '#888', fontSize: 16 }}>Seleccione un producto</span>
             </MenuItem>
-            {productos.map(p => (
+            {productos.filter(p => {
+              const texto = searchProd.toLowerCase();
+              return (
+                p.descripcion.toLowerCase().includes(texto) ||
+                (p.codigo || '').toString().toLowerCase().includes(texto)
+              );
+            }).map(p => (
               <MenuItem key={p.id} value={p.id} sx={{ py: 1.2, fontWeight: 500, fontSize: 18 }}>
                 {p.descripcion}
               </MenuItem>
