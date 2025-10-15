@@ -111,6 +111,7 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
               }}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               disabled={clientes.length === 0}
+              sx={{ width: 600, minWidth: 400, maxWidth: '100%' }}
             />
           </FormControl>
         </Grid>
