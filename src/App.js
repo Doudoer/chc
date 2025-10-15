@@ -1,157 +1,142 @@
-
+// Archivo principal de la app React para gestión de confecciones usando Supabase en vez de Firebase.
+// Aquí irá el nuevo código adaptado a Supabase.
 
 import React, { useState } from 'react';
-import { useAuthAndData } from './hooks/useAuthAndData';
-import { useFirebaseActions } from './hooks/useFirebaseActions';
-import LoadingView from './components/LoadingView';
-import CrudView from './components/CrudView';
-import DocumentGeneratorView from './components/DocumentGeneratorView';
-import DocumentosView from './components/DocumentosView';
-import AdminPanel from './AdminPanel';
-import Layout from './components/Layout';
-import Login from './Login';
+import { AppBar, Toolbar, Typography, Button, Grid, Paper, Card, CardContent, Box } from '@mui/material';
+import { useAuthAndData } from './hooksSupabase';
+import { useSupabaseActions } from './supabaseActions';
+import ProductosCrud from './ProductosCrud';
+import ClientesCrud from './ClientesCrud';
+import DocumentosCrud from './DocumentosCrud';
+import GeneradorDocumento from './GeneradorDocumento';
 
-function App() {
-  const [page, setPage] = useState('admin');
-  const { userId, userEmail, isAuthReady, error, productos, clientes, documentos, logout, autoLogin, setAutoLogin } = useAuthAndData();
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const { addItem, updateItem, deleteItem, loading, actionError } = useFirebaseActions(userId);
+export default function App() {
+  const { user, isAuthReady, error, productos, clientes, documentos } = useAuthAndData();
+  const { loading, actionError, performAction } = useSupabaseActions();
+  const [view, setView] = useState('DASHBOARD');
 
-
-  if (!autoLogin && !showLoginForm) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <h2>Sesión cerrada</h2>
-        <button style={{ padding: 12, fontSize: 18 }} onClick={() => setShowLoginForm(true)}>Iniciar sesión</button>
-      </div>
-    );
+  if (!isAuthReady) {
+    return <div>Cargando autenticación...</div>;
   }
-
-  if (showLoginForm) {
-    return <Login onLogin={() => { setShowLoginForm(false); setAutoLogin(true); }} />;
-  }
-
-  if (!isAuthReady) return <LoadingView loading={!isAuthReady} error={error} />;
 
   return (
-    <Layout page={page} setPage={setPage} userId={userId} userEmail={userEmail} onLogout={logout}>
-      {page === 'clientes' && (
-        <CrudView
-          title="Clientes"
-          type="clientes"
-          data={clientes}
-          userEmail={userEmail}
-          onAdd={item => {
-            if (!item.fechaCreacion) item.fechaCreacion = new Date().toISOString();
-            // Forzar teléfono como string
-            if (item.telefono !== undefined && item.telefono !== null) item.telefono = String(item.telefono);
-            addItem('clientes', item);
-          }}
-          onEdit={(id, item) => {
-            if (!item.fechaCreacion) item.fechaCreacion = new Date().toISOString();
-            if (item.telefono !== undefined && item.telefono !== null) item.telefono = String(item.telefono);
-            id ? updateItem('clientes', id, item) : addItem('clientes', item);
-          }}
-          onDelete={id => deleteItem('clientes', id)}
-          loading={loading}
-          error={actionError}
-        />
-      )}
-      {page === 'productos' && (
-        <CrudView
-          title="Productos"
-          type="productos"
-          data={productos}
-          userEmail={userEmail}
-          onAdd={item => {
-            // Generar código aleatorio si no viene del formulario
-            const codigo = item.codigo && item.codigo.length === 5 ? item.codigo : Math.floor(10000 + Math.random() * 90000).toString();
-            const prod = {
-              codigo,
-              descripcion: item.descripcion || '',
-              precioUnitario: Number(item.precioUnitario) || 0
-            };
-            addItem('productos', prod);
-          }}
-          onEdit={(id, item) => {
-            const prod = {
-              codigo: item.codigo || '',
-              descripcion: item.descripcion || '',
-              precioUnitario: Number(item.precioUnitario) || 0
-            };
-            id ? updateItem('productos', id, prod) : addItem('productos', prod);
-          }}
-          onDelete={id => deleteItem('productos', id)}
-          loading={loading}
-          error={actionError}
-        />
-      )}
-      {page === 'documento' && (
-        <DocumentGeneratorView
+    <Box sx={{ flexGrow: 1, bgcolor: '#f5f7fa', minHeight: '100vh' }}>
+      <AppBar position="static" color="inherit" elevation={1}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1, color: '#06b6d4', fontWeight: 'bold' }}>
+            Confecciones App
+          </Typography>
+          <Button color={view === 'DASHBOARD' ? 'primary' : 'inherit'} onClick={() => setView('DASHBOARD')}>INICIO</Button>
+          <Button color={view === 'GENERATOR' ? 'primary' : 'inherit'} onClick={() => setView('GENERATOR')}>CREAR DOCUMENTO</Button>
+          <Button color={view === 'DOCUMENTOS' ? 'primary' : 'inherit'} onClick={() => setView('DOCUMENTOS')}>DOCUMENTOS</Button>
+          <Button color={view === 'PRODUCTOS' ? 'primary' : 'inherit'} onClick={() => setView('PRODUCTOS')}>INVENTARIO</Button>
+          <Button color={view === 'CLIENTES' ? 'primary' : 'inherit'} onClick={() => setView('CLIENTES')}>CLIENTES</Button>
+          <Typography variant="caption" sx={{ ml: 2, color: '#888' }}>
+            Usuario ID: {user?.id}
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      {error && <Box sx={{ color: 'red', p: 2 }}>{error}</Box>}
+      {actionError && <Box sx={{ color: 'red', p: 2 }}>{actionError}</Box>}
+      {view === 'PRODUCTOS' ? (
+        <ProductosCrud productos={productos} performAction={performAction} loading={loading} />
+      ) : view === 'CLIENTES' ? (
+        <ClientesCrud clientes={clientes} performAction={performAction} loading={loading} />
+      ) : view === 'DOCUMENTOS' ? (
+        <DocumentosCrud documentos={documentos} performAction={performAction} loading={loading} clientes={clientes} />
+      ) : view === 'GENERATOR' ? (
+        <GeneradorDocumento
           clientes={clientes}
           productos={productos}
-          documentos={documentos}
-          userId={userId}
-          appId={window.__firebase_appId || 'default'}
-          onSave={doc => {
-            // Buscar snapshot de cliente
-            const cliente = clientes.find(c => c.id === doc.clienteId) || {};
-            // Estructura de items
-            const items = (doc.items || []).map(it => ({
-              productId: it.id,
-              codigo: it.codigo,
-              descripcion: it.descripcion,
-              cantidad: it.cantidad,
-              precioUnitario: it.precioUnitario,
-              lineTotal: Number(it.precioUnitario) * Number(it.cantidad)
-            }));
-            // Documento completo
-            const documento = {
-              tipo: doc.tipo,
-              numero: doc.numero,
-              fecha: doc.fecha,
-              clienteId: doc.clienteId,
-              clienteInfo: {
-                nombreEmpresa: cliente.nombreEmpresa,
-                rif: cliente.rif,
-                direccion: cliente.direccion,
-                telefono: cliente.telefono
-              },
-              estado: 'Pendiente',
-              currency: doc.moneda === 'BS' ? 'VES' : 'USD',
-              exchangeRate: doc.exchangeRate,
-              ivaTasa: 0.16,
-              subtotal: doc.subtotal,
-              total: doc.total,
-              usdTotal: doc.moneda === 'USD' ? doc.total : (doc.total / (doc.exchangeRate || 1)),
-              items
-            };
-            addItem('documentos', documento);
-          }}
           loading={loading}
-          error={actionError}
+          onGuardar={(doc) => performAction('crearDocumento', doc)}
         />
+      ) : (
+        // ...existing code...
+        <Box sx={{ p: 4 }}>
+          <Typography variant="h4" gutterBottom sx={{ color: '#06b6d4', mb: 4 }}>
+            Resumen del Sistema
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ borderBottom: '4px solid #f59e0b' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" color="textSecondary">Productos en Catálogo</Typography>
+                  <Typography variant="h4" sx={{ color: '#f59e0b', textAlign: 'center' }}>{productos.length}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ borderBottom: '4px solid #10b981' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" color="textSecondary">Clientes Registrados</Typography>
+                  <Typography variant="h4" sx={{ color: '#10b981', textAlign: 'center' }}>{clientes.length}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ borderBottom: '4px solid #ef4444' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" color="textSecondary">Cotizaciones Pendientes</Typography>
+                  <Typography variant="h4" sx={{ color: '#ef4444', textAlign: 'center' }}>{documentos.filter(d => d.tipo === 'COTIZACION').length}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ borderBottom: '4px solid #06b6d4' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" color="textSecondary">Total Ventas (NDE) Ref.</Typography>
+                  <Typography variant="h4" sx={{ color: '#06b6d4', textAlign: 'center' }}>
+                    ${documentos.filter(d => d.tipo === 'NOTA_DE_ENTREGA').reduce((sum, d) => sum + (parseFloat(d.total || 0)), 0).toFixed(2)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          <Typography variant="h4" gutterBottom sx={{ color: '#06b6d4', mb: 2 }}>
+            Historial de Documentos
+          </Typography>
+          <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', background: '#e0f7fa' }}>
+              <Box component="thead">
+                <Box component="tr">
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Número</Box>
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Tipo</Box>
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Cliente</Box>
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Fecha</Box>
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Total</Box>
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Moneda</Box>
+                  <Box component="th" sx={{ p: 1, fontWeight: 'bold' }}>Acciones</Box>
+                </Box>
+              </Box>
+              <Box component="tbody" sx={{ background: '#fff' }}>
+                {documentos.length === 0 && (
+                  <Box component="tr">
+                    <Box component="td" colSpan={7} sx={{ textAlign: 'center', p: 2 }}>
+                      No hay documentos registrados.
+                    </Box>
+                  </Box>
+                )}
+                {documentos.map(doc => {
+                  const cliente = clientes.find(c => c.id === doc.clienteId);
+                  return (
+                    <Box component="tr" key={doc.id}>
+                      <Box component="td" sx={{ p: 1 }}>{doc.numero}</Box>
+                      <Box component="td" sx={{ p: 1 }}>{doc.tipo}</Box>
+                      <Box component="td" sx={{ p: 1 }}>{cliente ? `${cliente.nombreEmpresa} (${cliente.rif})` : doc.clienteId}</Box>
+                      <Box component="td" sx={{ p: 1 }}>{doc.fecha}</Box>
+                      <Box component="td" sx={{ p: 1 }}>{doc.total}</Box>
+                      <Box component="td" sx={{ p: 1 }}>{doc.moneda || ''}</Box>
+                      <Box component="td" sx={{ p: 1 }}>-</Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+        // ...existing code...
       )}
-      {page === 'documentos' && (
-        <DocumentosView documentos={documentos} userEmail={userEmail} onDelete={id => deleteItem('documentos', id)} />
-      )}
-      {page === 'admin' && (
-        <AdminPanel
-          onCrearDocumento={() => setPage('documento')}
-          onClientes={() => setPage('clientes')}
-          onProductos={() => setPage('productos')}
-          resumen={{
-            productos: productos.length,
-            clientes: clientes.length,
-            cotizaciones: documentos.filter(d => d.tipo === 'COTIZACIÓN').length,
-            notasEntrega: documentos.filter(d => d.tipo === 'NOTA DE ENTREGA').length,
-            ventas: documentos.filter(d => d.tipo === 'NOTA DE ENTREGA').reduce((acc, d) => acc + (d.totalMoneda || 0), 0)
-          }}
-          documentos={documentos}
-        />
-      )}
-    </Layout>
+    </Box>
   );
 }
-
-export default App;
