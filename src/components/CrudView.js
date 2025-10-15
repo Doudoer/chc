@@ -8,6 +8,7 @@ import DataForm from './DataForm';
 export default function CrudView({ title, type, data, onAdd, onEdit, onDelete, loading, error, userEmail }) {
   const [editItem, setEditItem] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [search, setSearch] = useState('');
 
   const isCliente = type === 'clientes';
   const columns = isCliente
@@ -24,11 +25,39 @@ export default function CrudView({ title, type, data, onAdd, onEdit, onDelete, l
         { key: 'precioUnitario', label: 'Precio' },
       ];
 
+  // Filtrado en tiempo real
+  const filteredData = data.filter(row => {
+    if (!search) return true;
+    const texto = search.toLowerCase();
+    if (type === 'clientes') {
+      return (
+        (row.nombreEmpresa || '').toLowerCase().includes(texto) ||
+        (row.rif || '').toLowerCase().includes(texto) ||
+        (row.direccion || '').toLowerCase().includes(texto) ||
+        (row.telefono || '').toLowerCase().includes(texto)
+      );
+    } else {
+      return (
+        (row.codigo || '').toString().toLowerCase().includes(texto) ||
+        (row.descripcion || '').toLowerCase().includes(texto)
+      );
+    }
+  });
+
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{title}</Typography>
         <Button variant="contained" onClick={() => setEditItem({})}>Nuevo</Button>
+      </Box>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <input
+          type="text"
+          placeholder={type === 'clientes' ? 'Buscar cliente...' : 'Buscar producto...'}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: 8, fontSize: 16, borderRadius: 4, border: '1px solid #ccc', minWidth: 220 }}
+        />
       </Box>
       <TableContainer>
         <Table>
@@ -41,8 +70,8 @@ export default function CrudView({ title, type, data, onAdd, onEdit, onDelete, l
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.length > 0 ? (
-              data.map(row => (
+            {filteredData.length > 0 ? (
+              filteredData.map(row => (
                 <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   {columns.map(col =>
                     <TableCell key={col.key} sx={{ fontWeight: col.key === 'codigo' ? 700 : 400 }}>
