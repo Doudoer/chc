@@ -69,9 +69,7 @@ export default function DocumentosView({ documentos, onDelete, userEmail }) {
                   </TableCell>
                   <TableCell>
                     <Button size="small" sx={{ color: '#00bcd4', fontWeight: 700, mr: 1, minWidth: 0, p: 0 }} onClick={() => handleView(doc)}>VER</Button>
-                    {(!!userEmail && userEmail.trim().toLowerCase() !== 'user@chc.com') && (
-                      <Button size="small" sx={{ color: '#e53935', fontWeight: 700, minWidth: 0, p: 0 }} onClick={() => setDeleteId(doc.id)}>ELIMINAR</Button>
-                    )}
+                    <Button size="small" sx={{ color: '#e53935', fontWeight: 700, minWidth: 0, p: 0 }} onClick={() => setDeleteId(doc.id)}>ELIMINAR</Button>
                   </TableCell>
                 </TableRow>
               ))

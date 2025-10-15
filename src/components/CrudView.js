@@ -53,9 +53,7 @@ export default function CrudView({ title, type, data, onAdd, onEdit, onDelete, l
                   )}
                   <TableCell sx={{ textAlign: 'right', minWidth: 120 }}>
                     <Button size="small" sx={{ color: '#00bcd4', fontWeight: 700, mr: 1, minWidth: 0, p: 0 }} onClick={() => setEditItem(row)}>EDITAR</Button>
-                    {(!!userEmail && userEmail.trim().toLowerCase() !== 'user@chc.com') && (
-                      <Button size="small" sx={{ color: '#e53935', fontWeight: 700, minWidth: 0, p: 0 }} onClick={() => setDeleteId(row.id)}>ELIMINAR</Button>
-                    )}
+                    <Button size="small" sx={{ color: '#e53935', fontWeight: 700, minWidth: 0, p: 0 }} onClick={() => setDeleteId(row.id)}>ELIMINAR</Button>
                   </TableCell>
                 </TableRow>
               ))
