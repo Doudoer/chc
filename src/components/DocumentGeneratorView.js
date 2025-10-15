@@ -1,6 +1,6 @@
 // DocumentGeneratorView.js
 import React, { useState, useMemo } from 'react';
-import { Paper, Typography, Grid, TextField, MenuItem, Button, Table, TableHead, TableRow, TableCell, TableBody, Box, Divider, Alert, FormControl, FormLabel } from '@mui/material';
+import { Paper, Typography, Grid, TextField, MenuItem, Button, Table, TableHead, TableRow, TableCell, TableBody, Box, Divider, Alert, FormControl, FormLabel, Autocomplete } from '@mui/material';
 
 function generateDocumentNumber(documentos, tipo) {
   const year = new Date().getFullYear();
@@ -18,6 +18,7 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0,10));
   const [items, setItems] = useState([]);
   const [itemId, setItemId] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [iva, setIva] = useState(0.16);
   const [searchProd, setSearchProd] = useState('');
 
@@ -128,80 +129,21 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
       <Typography variant="h6">Artículos</Typography>
       <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <Grid item xs={12} sm={8} md={6}>
-          <Box sx={{ mb: 1 }}>
-            <input
-              type="text"
-              placeholder="Buscar producto..."
-              value={searchProd}
-              onChange={e => setSearchProd(e.target.value)}
-              style={{ padding: 8, fontSize: 16, borderRadius: 4, border: '1px solid #ccc', minWidth: 220, width: '100%' }}
-            />
-          </Box>
-          <TextField
-            select
-            label="Añadir Producto"
-            value={itemId}
-            onChange={e => setItemId(e.target.value)}
+          <Autocomplete
+            options={productos}
+            getOptionLabel={option => `${option.descripcion} (${option.codigo})`}
+            renderInput={params => (
+              <TextField {...params} label="Buscar y añadir producto" variant="outlined" />
+            )}
+            value={selectedProduct}
+            onChange={(_, value) => {
+              setSelectedProduct(value);
+              setItemId(value ? value.id : '');
+            }}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             disabled={productos.length === 0}
-            variant="outlined"
-            sx={{
-              width: 400,
-              background: '#fafbfc',
-              borderRadius: 2,
-              '& .MuiSelect-select': {
-                minHeight: 32,
-                fontSize: 15,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 500
-              },
-              '& .MuiInputBase-input': {
-                minHeight: 32,
-                fontSize: 15,
-                textAlign: 'center',
-                fontWeight: 500
-              },
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderWidth: 2
-              }
-            }}
-            InputProps={{
-              style: {
-                minHeight: 32,
-                fontSize: 15,
-                textAlign: 'center',
-                fontWeight: 500
-              }
-            }}
-            SelectProps={{
-              MenuProps: {
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                    borderRadius: 12,
-                    fontSize: 16,
-                    minWidth: 400
-                  },
-                },
-              },
-            }}
-          >
-            <MenuItem value="" disabled>
-              <span style={{ color: '#888', fontSize: 16 }}>Seleccione un producto</span>
-            </MenuItem>
-            {productos.filter(p => {
-              const texto = searchProd.toLowerCase();
-              return (
-                p.descripcion.toLowerCase().includes(texto) ||
-                (p.codigo || '').toString().toLowerCase().includes(texto)
-              );
-            }).map(p => (
-              <MenuItem key={p.id} value={p.id} sx={{ py: 1.2, fontWeight: 500, fontSize: 18 }}>
-                {p.descripcion}
-              </MenuItem>
-            ))}
-          </TextField>
+            sx={{ width: 400, background: '#fafbfc', borderRadius: 2 }}
+          />
         </Grid>
         <Grid item>
           <Button variant="contained" onClick={addItem} disabled={!itemId || productos.length === 0}>Añadir</Button>
