@@ -13,6 +13,7 @@ function generateDocumentNumber(documentos, tipo) {
 export default function DocumentGeneratorView({ clientes, productos, documentos, onSave, loading, error, userId, appId = 'default' }) {
   const [tipo, setTipo] = useState('COTIZACIÓN');
   const [clienteId, setClienteId] = useState('');
+  const [selectedCliente, setSelectedCliente] = useState(null);
   const [moneda, setMoneda] = useState('USD');
   const [exchangeRate, setExchangeRate] = useState('');
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0,10));
@@ -97,10 +98,20 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
         <Grid item xs={12} sm={3}>
           <FormControl fullWidth>
             <FormLabel sx={{ mb: 1 }}>Cliente</FormLabel>
-            <TextField select value={clienteId} onChange={e => setClienteId(e.target.value)} disabled={clientes.length === 0}>
-              <MenuItem value="" disabled>Cliente</MenuItem>
-              {clientes.map(c => <MenuItem key={c.id} value={c.id}>{c.nombreEmpresa || c.nombre}</MenuItem>)}
-            </TextField>
+            <Autocomplete
+              options={clientes}
+              getOptionLabel={option => option.nombreEmpresa || option.nombre || ''}
+              renderInput={params => (
+                <TextField {...params} label="Buscar y seleccionar cliente" variant="outlined" />
+              )}
+              value={selectedCliente}
+              onChange={(_, value) => {
+                setSelectedCliente(value);
+                setClienteId(value ? value.id : '');
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              disabled={clientes.length === 0}
+            />
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={3}>
