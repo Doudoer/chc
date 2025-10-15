@@ -1,25 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+
+
+import React, { useState } from 'react';
+import Login from './Login';
+import AdminPanel from './AdminPanel';
+import CrearDocumento from './CrearDocumento';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [page, setPage] = useState('admin');
+
+  if (!loggedIn) {
+    return <Login onLogin={() => setLoggedIn(true)} />;
+  }
+
+  // Pasar setPage a los paneles para navegación
+  if (page === 'crear') {
+    return <CrearDocumento onBack={() => setPage('admin')} />;
+  }
+  return <AdminPanel onCrearDocumento={() => setPage('crear')} />;
 }
 
 export default App;
