@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import app from './firebase';
+// Logo se carga desde public
 
 const auth = getAuth(app);
 
@@ -24,6 +26,7 @@ export default function Login({ onLogin }) {
   return (
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+  <img src="/chc.png" alt="Logo CHC" style={{ width: 90, marginBottom: 16 }} />
         <Typography component="h1" variant="h5">Iniciar Sesión</Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
