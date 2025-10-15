@@ -83,6 +83,16 @@ export default function CrudView({ title, type, data, onAdd, onEdit, onDelete, l
           error={error}
         />
       )}
+      {/* Modal de confirmación para eliminar */}
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
+        <Box sx={{ p: 3 }}>
+          <Typography>¿Seguro que deseas eliminar este {type === 'clientes' ? 'cliente' : 'producto'}?</Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={() => setDeleteId(null)} sx={{ mr: 2 }}>Cancelar</Button>
+            <Button color="error" variant="contained" onClick={() => { onDelete(deleteId); setDeleteId(null); }}>Eliminar</Button>
+          </Box>
+        </Box>
+      </Dialog>
     </Paper>
   );
 }
