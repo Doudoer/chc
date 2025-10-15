@@ -101,6 +101,16 @@ export default function DocumentGeneratorView({ clientes, productos, documentos,
             <Autocomplete
               options={clientes}
               getOptionLabel={option => option.nombreEmpresa || option.nombre || ''}
+              filterOptions={(options, { inputValue }) => {
+                const texto = inputValue.toLowerCase();
+                return options.filter(c =>
+                  (c.nombreEmpresa || '').toLowerCase().includes(texto) ||
+                  (c.nombre || '').toLowerCase().includes(texto) ||
+                  (c.rif || '').toLowerCase().includes(texto) ||
+                  (c.direccion || '').toLowerCase().includes(texto) ||
+                  (c.telefono || '').toLowerCase().includes(texto)
+                );
+              }}
               renderInput={params => (
                 <TextField {...params} label="Buscar y seleccionar cliente" variant="outlined" />
               )}
