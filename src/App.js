@@ -26,14 +26,117 @@ export default function App() {
           <Typography variant="h6" sx={{ flexGrow: 1, color: '#06b6d4', fontWeight: 'bold' }}>
             Confecciones App
           </Typography>
-          <Button color={view === 'DASHBOARD' ? 'primary' : 'inherit'} onClick={() => setView('DASHBOARD')}>INICIO</Button>
-          <Button color={view === 'GENERATOR' ? 'primary' : 'inherit'} onClick={() => setView('GENERATOR')}>CREAR DOCUMENTO</Button>
-          <Button color={view === 'DOCUMENTOS' ? 'primary' : 'inherit'} onClick={() => setView('DOCUMENTOS')}>DOCUMENTOS</Button>
-          <Button color={view === 'PRODUCTOS' ? 'primary' : 'inherit'} onClick={() => setView('PRODUCTOS')}>INVENTARIO</Button>
-          <Button color={view === 'CLIENTES' ? 'primary' : 'inherit'} onClick={() => setView('CLIENTES')}>CLIENTES</Button>
-          <Typography variant="caption" sx={{ ml: 2, color: '#888' }}>
-            Usuario ID: {user?.id}
-          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant={view === 'DASHBOARD' ? 'contained' : 'text'}
+              color={view === 'DASHBOARD' ? 'primary' : 'inherit'}
+              onClick={() => setView('DASHBOARD')}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 500,
+                px: 2.5,
+                boxShadow: view === 'DASHBOARD' ? 2 : 0,
+                transition: 'all 0.2s',
+                bgcolor: view === 'DASHBOARD' ? '#06b6d4' : 'transparent',
+                color: view === 'DASHBOARD' ? '#fff' : '#06b6d4',
+                '&:hover': {
+                  bgcolor: view === 'DASHBOARD' ? '#039cb7' : '#e0f7fa',
+                  color: '#06b6d4',
+                },
+              }}
+            >INICIO</Button>
+            <Button
+              variant={view === 'GENERATOR' ? 'contained' : 'text'}
+              color={view === 'GENERATOR' ? 'primary' : 'inherit'}
+              onClick={() => setView('GENERATOR')}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 500,
+                px: 2.5,
+                boxShadow: view === 'GENERATOR' ? 2 : 0,
+                transition: 'all 0.2s',
+                bgcolor: view === 'GENERATOR' ? '#06b6d4' : 'transparent',
+                color: view === 'GENERATOR' ? '#fff' : '#06b6d4',
+                '&:hover': {
+                  bgcolor: view === 'GENERATOR' ? '#039cb7' : '#e0f7fa',
+                  color: '#06b6d4',
+                },
+              }}
+            >CREAR DOCUMENTO</Button>
+            <Button
+              variant={view === 'DOCUMENTOS' ? 'contained' : 'text'}
+              color={view === 'DOCUMENTOS' ? 'primary' : 'inherit'}
+              onClick={() => setView('DOCUMENTOS')}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 500,
+                px: 2.5,
+                boxShadow: view === 'DOCUMENTOS' ? 2 : 0,
+                transition: 'all 0.2s',
+                bgcolor: view === 'DOCUMENTOS' ? '#06b6d4' : 'transparent',
+                color: view === 'DOCUMENTOS' ? '#fff' : '#06b6d4',
+                '&:hover': {
+                  bgcolor: view === 'DOCUMENTOS' ? '#039cb7' : '#e0f7fa',
+                  color: '#06b6d4',
+                },
+              }}
+            >DOCUMENTOS</Button>
+            <Button
+              variant={view === 'PRODUCTOS' ? 'contained' : 'text'}
+              color={view === 'PRODUCTOS' ? 'primary' : 'inherit'}
+              onClick={() => setView('PRODUCTOS')}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 500,
+                px: 2.5,
+                boxShadow: view === 'PRODUCTOS' ? 2 : 0,
+                transition: 'all 0.2s',
+                bgcolor: view === 'PRODUCTOS' ? '#06b6d4' : 'transparent',
+                color: view === 'PRODUCTOS' ? '#fff' : '#06b6d4',
+                '&:hover': {
+                  bgcolor: view === 'PRODUCTOS' ? '#039cb7' : '#e0f7fa',
+                  color: '#06b6d4',
+                },
+              }}
+            >INVENTARIO</Button>
+            <Button
+              variant={view === 'CLIENTES' ? 'contained' : 'text'}
+              color={view === 'CLIENTES' ? 'primary' : 'inherit'}
+              onClick={() => setView('CLIENTES')}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 500,
+                px: 2.5,
+                boxShadow: view === 'CLIENTES' ? 2 : 0,
+                transition: 'all 0.2s',
+                bgcolor: view === 'CLIENTES' ? '#06b6d4' : 'transparent',
+                color: view === 'CLIENTES' ? '#fff' : '#06b6d4',
+                '&:hover': {
+                  bgcolor: view === 'CLIENTES' ? '#039cb7' : '#e0f7fa',
+                  color: '#06b6d4',
+                },
+              }}
+            >CLIENTES</Button>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              sx={{ fontWeight: 500, borderRadius: 2, px: 2, py: 0.5, textTransform: 'none' }}
+              onClick={() => {
+                if (window.confirm('¿Seguro que deseas cerrar sesión?')) {
+                  if (window.supabase) {
+                    window.supabase.auth.signOut();
+                  } else if (window.location) {
+                    window.location.reload();
+                  }
+                }
+              }}
+            >
+              Cerrar sesión
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       {error && <Box sx={{ color: 'red', p: 2 }}>{error}</Box>}
